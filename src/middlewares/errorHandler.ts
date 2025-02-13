@@ -1,11 +1,11 @@
 import APIError from "../@utils/error";
-import { ErrorRequestHandler } from "express";
+import { ErrorRequestHandler, Request, Response, NextFunction } from "express";
 
 const errorHandlerMiddleware: ErrorRequestHandler = (
-  err,
-  req,
-  res,
-  next
+  err: Error | APIError,
+  req: Request,
+  res: Response,
+  next: NextFunction
 ): void => {
   if (err instanceof APIError) {
     res.status(err.statusCode || 400).json({

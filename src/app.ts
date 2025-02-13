@@ -4,7 +4,7 @@ import http from "http";
 import { config } from "./@utils/config";
 import dbConnection from "./db/dbConnection";
 import errorHandlerMiddleware from "./middlewares/errorHandler";
-import router from "./routes";
+import routers from "./routes";
 
 const app = express();
 const server = http.createServer(app);
@@ -15,7 +15,7 @@ app.use(
   express.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 })
 );
 
-app.use("api", router);
+app.use("/api", routers);
 
 app.use(errorHandlerMiddleware);
 dbConnection()

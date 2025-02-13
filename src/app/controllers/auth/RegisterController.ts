@@ -4,14 +4,15 @@ import bcrypt from "bcrypt";
 import APIError from "../../../@utils/error";
 import ResponseMessage from "../../../@utils/response";
 
-export const Register = async (req: Request, res: Response) => {
+export const Register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { fullName, userName, password } = req.body;
 
     const userCheck = await User.findOne({ userName });
 
     if (userCheck) {
-      throw new ResponseMessage("Bu kullanıcı adı zaten mevcut!").error400(res);
+      new ResponseMessage("Bu kullanıcı adı zaten mevcut!").error400(res);
+      return;
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -21,8 +22,9 @@ export const Register = async (req: Request, res: Response) => {
       password: hashedPassword,
     });
     await newUser.save();
-    return new ResponseMessage("Kullanıcı başarıyla eklendi").created(res);
+    new ResponseMessage("Kullanıcı başarıyla eklendi").created(res);
+    return;
   } catch (error) {
-    return new APIError("Kullanıcı kayıt esnasında bir sorun oluştu!", 400);
+    throw new APIError("Kullanıcı kayıt esnasında bir sorun oluştu!", 400);
   }
 };
