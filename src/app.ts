@@ -2,9 +2,33 @@ import express from "express";
 import { Server } from "socket.io";
 import http from "http";
 import { config } from "./@utils/config";
+import dbConnection from "./db/dbConnection";
+import errorHandlerMiddleware from "./middlewares/errorHandler";
+import router from "./routes";
 
 const app = express();
 const server = http.createServer(app);
+
+// middleware for reading req body json
+app.use(express.json({ limit: "50mb" }));
+app.use(
+  express.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 })
+);
+
+app.use("api", router);
+
+app.use(errorHandlerMiddleware);
+dbConnection()
+  .then(() => {
+    app.listen(config.port, () => {
+      console.log(
+        `Express server is listening at http://localhost:${config.port}`
+      );
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to connect to MongoDB:", error);
+  });
 const io = new Server(server, {
   cors: {
     origin: "*",
