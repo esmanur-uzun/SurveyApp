@@ -16,7 +16,7 @@ const baseSchemaFields = {
 const baseSchemaOptions = {
   timestamps: {
     createdAt: "createdAt",
-    updateAt: "updatedAt",
+    updatedAt: "updatedAt",
   },
   _id: false,
 };

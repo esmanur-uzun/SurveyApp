@@ -12,11 +12,12 @@ interface UserPayload {
 declare module "express-serve-static-core" {
   interface Request {
     user?: UserPayload;
+    userId?: string;
   }
 }
 
 const JWT = {
-  createToken(user: { userName: string }, res: Response) {
+  createToken(user: { userName: string }) {
     try {
       const secretKey = config.jwt_access_secret as string;
 
@@ -24,33 +25,35 @@ const JWT = {
         algorithm: "HS512",
         expiresIn: Number(config.jwt_expires_in) || "1h",
       });
-      return res.status(201).json({
-        success: true,
-        token,
-        message: "Giriş başarılı",
-      });
+      return token;
     } catch (error) {
       throw new APIError("Token oluşturulurken bir hata oluştu!", 401);
     }
   },
 
-  async tokenCheck(req: Request, res: Response, next: NextFunction) {
+  async verifyToken(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const headerToken =
         req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer ");
 
       if (!headerToken) {
-        return new ResponseMessage(
-          "Geçersiz oturum, lütfen giriş yapın!"
-        ).error401(res);
+        new ResponseMessage("Geçersiz oturum, lütfen giriş yapın!").error401(
+          res
+        );
+        return;
       }
 
       const token = req.headers.authorization?.split(" ")[1];
       if (!token) {
-        return new ResponseMessage(
-          "Token bulunamadı, lütfen giriş yapın!"
-        ).error401(res);
+        new ResponseMessage("Token bulunamadı, lütfen giriş yapın!").error401(
+          res
+        );
+        return;
       }
 
       const decoded = jwt.verify(
@@ -62,20 +65,24 @@ const JWT = {
         const userInfo = await User.findOne({ userName: decoded.userName });
 
         if (!userInfo) {
-          return new ResponseMessage("Kullanıcı bulunamadı!").error401(res);
+          new ResponseMessage("Kullanıcı bulunamadı!").error401(res);
+          return;
         }
 
         req.user = userInfo;
+        req.userId = userInfo._id.toString();
       }
       next();
     } catch (error) {
       if (error instanceof jwt.JsonWebTokenError) {
-        return new ResponseMessage("Geçersiz token!").error401(res);
+        new ResponseMessage("Geçersiz token!").error401(res);
+        return;
       }
       if (error instanceof jwt.TokenExpiredError) {
-        return new ResponseMessage(
+        new ResponseMessage(
           "Token süresi dolmuş, lütfen tekrar giriş yapın!"
         ).error401(res);
+        return;
       }
       throw new APIError("Yetkilendirme hatası!", 401);
     }

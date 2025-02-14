@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IBaseModel } from "../../@base/baseModel";
 
-export interface User extends IBaseModel {
+export interface IUser extends IBaseModel {
   fullName: string;
   userName: string;
   password: string;
@@ -27,6 +27,6 @@ const userSchema = new Schema(userSchemaFields, {
   timestamps: true,
 });
 
-const User = mongoose.model<User>("User", userSchema);
+const User = mongoose.model<IUser>("User", userSchema);
 
 export default User;

@@ -4,13 +4,13 @@ import ResponseMessage from "../@utils/response";
 import APIError from "../@utils/error";
 import { Server } from "socket.io";
 
-class BaseController<T extends Document> {
+class BaseController<T> {
   protected model: Model<T>;
   protected io!: Server;
 
   constructor(model: Model<T>, io: Server) {
     this.model = model;
-    this.io = this.io;
+    this.io = io;
   }
   // create a data
   public create = async (req: Request, res: Response): Promise<void> => {
