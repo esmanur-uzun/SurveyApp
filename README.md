@@ -10,4 +10,6 @@ Before running the application, make sure to install the dependencies:
 2. Install the required packages:
    ```bash
    npm install
-
+3. Start the development server:
+For the UI: npm run dev
+For the API: npm run dev
